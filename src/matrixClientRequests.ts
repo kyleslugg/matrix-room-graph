@@ -1,6 +1,6 @@
 const { access_token, homeserver, userId } = process.env;
 
-export const createRoom = (
+export const createRoom = async (
   name: string,
   type: string = 'child',
   invite_users: Array<string> = []

@@ -102,8 +102,10 @@ const handleMessage = async (event) => {
   if (message.includes('create')) {
     const words = message.split(' ');
     const name = words[words.indexOf('create') + 1];
-    createRoom(name, 'child', [sender]);
-    return;
+    let result = await createRoom(name, 'child', [sender]);
+    if (result.ok) {
+      sendMessage(room_id, `Room ${name} created.`);
+    }
   }
 };
 

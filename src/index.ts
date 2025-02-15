@@ -4,6 +4,14 @@ import { RoomEvent, ClientEvent } from 'matrix-js-sdk';
 import handleMessage from './messages';
 import handleReaction from './reactions';
 import handleMember from './members';
+import { initRoomGraph } from './roomGraph';
+
+const TEST_ROOM_LIST = [
+  'Queer Affinity',
+  'Girlz Klub',
+  'We Live in Hackney',
+  'We have Always Lived in the Castle'
+];
 
 const { homeserver, access_token, userId, rootRoomId } = process.env;
 
@@ -19,6 +27,9 @@ const start = async () => {
   client.once(ClientEvent.Sync, async (state, prevState, res) => {
     // state will be 'PREPARED' when the client is ready to use
     console.log(state);
+
+    // Initialize the room graph with the root room and TEST_ROOM_LIST
+    client['room_graph'] = initRoomGraph(rootRoomId, TEST_ROOM_LIST);
   });
 
   const scriptStart = Date.now();
