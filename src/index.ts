@@ -3,7 +3,7 @@ import * as sdk from 'matrix-js-sdk';
 import { RoomEvent, ClientEvent } from 'matrix-js-sdk';
 import handleMessage from './messages';
 import handleReaction from './reactions';
-import handleJoin from './members';
+import handleMember from './members';
 
 const { homeserver, access_token, userId, rootRoomId } = process.env;
 
@@ -22,6 +22,8 @@ const start = async () => {
   });
 
   const scriptStart = Date.now();
+
+  // Eventually, create a private-chate-type-room with the bot to handle onboarding
 
   client.on(
     RoomEvent.Timeline,
@@ -44,7 +46,7 @@ const start = async () => {
 
       if (event.getType() === 'm.reaction') handleReaction(event);
 
-      if (event.getType() === 'm.room.member') handleJoin(event);
+      if (event.getType() === 'm.room.member') handleMember(event);
     }
   );
 };

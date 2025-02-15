@@ -11,11 +11,11 @@ const newMember = async (roomId: string) => {
   );
 };
 
-const handleJoin = async (event) => {
+const handleMember = async (event) => {
   const { room_id } = event.event;
   console.log('message:', 'SOMEBODY JUST JOINED');
   newMember(room_id);
   return;
 };
 
-export default handleJoin;
+export default handleMember;

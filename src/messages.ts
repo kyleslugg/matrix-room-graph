@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
-import { sendMessage, getEvent } from './matrixClientRequests';
+import { sendMessage, getEvent, createRoom } from './matrixClientRequests';
 import { PERSON_NAME, ROLE_NAME, PSEUDO_STATE_EVENT_TYPE } from './constants';
 import { getPseudoState, setPseudoState } from './pseudoState';
 
@@ -84,7 +84,7 @@ const handleReply = async (event) => {
 
 const handleMessage = async (event) => {
   const message = event.event.content.body.toLowerCase();
-  const { room_id } = event.event;
+  const { room_id, sender } = event.event;
 
   //if message is a reply, handle reply
   if (event.event.content['m.relates_to']) {
@@ -95,6 +95,14 @@ const handleMessage = async (event) => {
   //if message has the tool's wake word, say hello
   if (message.includes('example')) {
     hello(room_id);
+    return;
+  }
+
+  //if message includes 'create', create a new room with the next word as the name
+  if (message.includes('create')) {
+    const words = message.split(' ');
+    const name = words[words.indexOf('create') + 1];
+    createRoom(name, 'child', [sender]);
     return;
   }
 };

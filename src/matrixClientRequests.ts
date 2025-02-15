@@ -1,13 +1,21 @@
 const { access_token, homeserver, userId } = process.env;
 
-export const createRoom = () => {
-  let body = { creation_content: { 'm.federate': true }, Invite: [userId] };
+export const createRoom = (
+  name: string,
+  type: string = 'child',
+  invite_users: Array<string> = []
+) => {
+  let body = {
+    creation_content: { 'm.federate': true, type: type },
+    invite: invite_users,
+    is_direct: false, // Signifies whether the room is a direct chat or not
+    name: name,
+    visibility: 'private'
+  };
 
   return fetch(`${homeserver}/_matrix/client/v3/createRoom`, {
     method: 'POST',
-    body: JSON.stringify({
-      visibility: 'public'
-    }),
+    body: JSON.stringify(body),
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${access_token}`
