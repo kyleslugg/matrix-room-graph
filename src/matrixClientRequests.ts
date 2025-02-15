@@ -1,13 +1,28 @@
-const { access_token, homeserver } = process.env;
+const { access_token, homeserver, userId } = process.env;
+
+export const createRoom = () => {
+  let body = { creation_content: { 'm.federate': true }, Invite: [userId] };
+
+  return fetch(`${homeserver}/_matrix/client/v3/createRoom`, {
+    method: 'POST',
+    body: JSON.stringify({
+      visibility: 'public'
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${access_token}`
+    }
+  });
+};
 
 export const sendEvent = (roomId: string, content: any, type: string) => {
   return fetch(`${homeserver}/_matrix/client/v3/rooms/${roomId}/send/${type}`, {
-    method: "POST",
+    method: 'POST',
     body: JSON.stringify(content),
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${access_token}`,
-    },
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${access_token}`
+    }
   });
 };
 
@@ -16,10 +31,10 @@ export const sendMessage = (roomId: string, message: string, context = {}) => {
     roomId,
     {
       body: message,
-      msgtype: "m.text",
-      context,
+      msgtype: 'm.text',
+      context
     },
-    "m.room.message"
+    'm.room.message'
   );
 };
 
@@ -28,8 +43,8 @@ export const getEvent = async (roomId: string, eventId: string) => {
     `${homeserver}/_matrix/client/v3/rooms/${roomId}/event/${eventId}`,
     {
       headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
+        Authorization: `Bearer ${access_token}`
+      }
     }
   );
   return response.json();
@@ -40,9 +55,9 @@ export const getRoomEvents = (roomId: string) => {
     `${homeserver}/_matrix/client/v3/rooms/${roomId}/messages?limit=10000&dir=b`,
     {
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${access_token}`,
-      },
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${access_token}`
+      }
     }
   );
 };
@@ -57,13 +72,13 @@ export const redactEvent = async (
   return fetch(
     `${homeserver}/_matrix/client/v3/rooms/${roomId}/redact/${eventId}/${txn}`,
     {
-      method: "PUT",
+      method: 'PUT',
       body: JSON.stringify({
-        reason: redactionReason,
+        reason: redactionReason
       }),
       headers: {
-        Authorization: `Bearer ${access_token}`,
-      },
+        Authorization: `Bearer ${access_token}`
+      }
     }
   );
 };

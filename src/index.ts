@@ -1,15 +1,16 @@
-import "dotenv/config";
-import * as sdk from "matrix-js-sdk";
-import { RoomEvent, ClientEvent } from "matrix-js-sdk";
-import handleMessage from "./messages";
-import handleReaction from "./reactions";
+import 'dotenv/config';
+import * as sdk from 'matrix-js-sdk';
+import { RoomEvent, ClientEvent } from 'matrix-js-sdk';
+import handleMessage from './messages';
+import handleReaction from './reactions';
+import handleJoin from './members';
 
-const { homeserver, access_token, userId, whatsAppRoomId } = process.env;
+const { homeserver, access_token, userId, rootRoomId } = process.env;
 
 const client = sdk.createClient({
   baseUrl: homeserver,
   accessToken: access_token,
-  userId,
+  userId
 });
 
 const start = async () => {
@@ -35,21 +36,15 @@ const start = async () => {
         return; // don't reply to messages sent by the tool
       }
 
-      if (event.event.room_id !== whatsAppRoomId) {
+      if (event.event.room_id !== rootRoomId) {
         return; // don't activate unless in the active room
       }
 
-      if (
-        event.getType() !== "m.room.message" &&
-        event.getType() !== "m.reaction"
-      ) {
-        console.log("skipping event:", event);
-        return; // only use messages or reactions
-      }
+      if (event.getType() === 'm.room.message') handleMessage(event);
 
-      if (event.getType() === "m.room.message") handleMessage(event);
+      if (event.getType() === 'm.reaction') handleReaction(event);
 
-      if (event.getType() === "m.reaction") handleReaction(event);
+      if (event.getType() === 'm.room.member') handleJoin(event);
     }
   );
 };

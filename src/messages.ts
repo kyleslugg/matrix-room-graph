@@ -1,15 +1,15 @@
-import { v4 as uuidv4 } from "uuid";
-import { sendMessage, getEvent } from "./matrixClientRequests";
-import { PERSON_NAME, ROLE_NAME, PSEUDO_STATE_EVENT_TYPE } from "./constants";
-import { getPseudoState, setPseudoState } from "./pseudoState";
+import { v4 as uuidv4 } from 'uuid';
+import { sendMessage, getEvent } from './matrixClientRequests';
+import { PERSON_NAME, ROLE_NAME, PSEUDO_STATE_EVENT_TYPE } from './constants';
+import { getPseudoState, setPseudoState } from './pseudoState';
 
 const { userId } = process.env;
 
 const hello = async (roomId: string) => {
   sendMessage(
     roomId,
-    `🤖Example Tool🤖: Hello I'm the matrix example tool. 
-    I track who has been assigned roles in this group. 
+    `🤖Example Tool🤖: Hello I'm the matrix example tool.
+    I track who has been assigned roles in this group.
     React to this message with:\n
     ❤️ to see the current assigned roles\n
     👍 to assign a role to someone`
@@ -22,9 +22,9 @@ const sendPersonRequest = (roomId: string, replyText: string) => {
     `Quote-reply to this message with the name of the role you want to assign to ${replyText}.`,
     {
       person: {
-        name: replyText,
+        name: replyText
       },
-      expecting: ROLE_NAME,
+      expecting: ROLE_NAME
     }
   );
 };
@@ -39,8 +39,8 @@ const assignRole = async (
   if (!roleState) {
     roleState = {
       content: {
-        assignedRoles: [],
-      },
+        assignedRoles: []
+      }
     };
   }
 
@@ -48,11 +48,11 @@ const assignRole = async (
   assignedRoles.push({
     id: uuidv4(),
     person: {
-      name: personName,
+      name: personName
     },
     role: {
-      name: replyText,
-    },
+      name: replyText
+    }
   });
 
   setPseudoState(roomId, PSEUDO_STATE_EVENT_TYPE, { assignedRoles });
@@ -63,9 +63,9 @@ const assignRole = async (
 const handleReply = async (event) => {
   const roomId = event.event.room_id;
   const message = event.event.content.body;
-  const replyText = message.split("\n\n")[1] || message;
+  const replyText = message.split('\n\n')[1] || message;
   const prevEventId =
-    event.event.content["m.relates_to"]["m.in_reply_to"].event_id;
+    event.event.content['m.relates_to']['m.in_reply_to'].event_id;
 
   const prevEvent = (await getEvent(roomId, prevEventId)) as any;
 
@@ -87,13 +87,13 @@ const handleMessage = async (event) => {
   const { room_id } = event.event;
 
   //if message is a reply, handle reply
-  if (event.event.content["m.relates_to"]) {
+  if (event.event.content['m.relates_to']) {
     handleReply(event);
     return;
   }
 
   //if message has the tool's wake word, say hello
-  if (message.includes("example")) {
+  if (message.includes('example')) {
     hello(room_id);
     return;
   }
