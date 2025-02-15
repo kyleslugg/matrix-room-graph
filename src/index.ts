@@ -7,10 +7,11 @@ import handleMember from './members';
 import { initRoomGraph } from './roomGraph';
 
 const TEST_ROOM_LIST = [
-  'Queer Affinity',
-  'Girlz Klub',
-  'We Live in Hackney',
-  'We have Always Lived in the Castle'
+  'Hackney',
+  'Tower Hamlets',
+  'Ealing',
+  'LGBTQ bloc',
+  'Trade Union bloc'
 ];
 
 const { homeserver, access_token, userId, rootRoomId } = process.env;
@@ -25,11 +26,13 @@ const start = async () => {
   await client.startClient();
 
   client.once(ClientEvent.Sync, async (state, prevState, res) => {
+    // Initialize the room graph with the root room and TEST_ROOM_LIST
+    const roomGraph = await initRoomGraph(rootRoomId, TEST_ROOM_LIST);
+    client['room_graph'] = roomGraph; // Add room graph to client for future reference
+    console.log('Room Graph:', roomGraph);
+
     // state will be 'PREPARED' when the client is ready to use
     console.log(state);
-
-    // Initialize the room graph with the root room and TEST_ROOM_LIST
-    client['room_graph'] = initRoomGraph(rootRoomId, TEST_ROOM_LIST);
   });
 
   const scriptStart = Date.now();
@@ -40,6 +43,8 @@ const start = async () => {
     RoomEvent.Timeline,
     async function (event, room, toStartOfTimeline) {
       const eventTime = event.event.origin_server_ts;
+      // console.log('LOGGING ROOM', room);
+      console.log(event);
 
       if (scriptStart > eventTime) {
         return; //don't run commands for old messages
@@ -52,6 +57,8 @@ const start = async () => {
       if (event.event.room_id !== rootRoomId) {
         return; // don't activate unless in the active room
       }
+      // Add room graph to event for future reference
+      event['room_graph'] = client['room_graph'];
 
       if (event.getType() === 'm.room.message') handleMessage(event);
 

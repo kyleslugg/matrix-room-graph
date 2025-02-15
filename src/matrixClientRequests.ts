@@ -23,6 +23,36 @@ export const createRoom = async (
   });
 };
 
+export const addToRoom = async (roomId: string, userId: string) => {
+  return fetch(`${homeserver}/_matrix/client/v3/rooms/${roomId}/invite`, {
+    method: 'POST',
+    body: JSON.stringify({
+      user_id: userId
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${access_token}`
+    }
+  });
+};
+
+export const leaveAndForgetRoom = async (roomId: string) => {
+  return (
+    fetch(`${homeserver}/_matrix/client/v3/rooms/${roomId}/leave`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${access_token}`
+      }
+    }) &&
+    fetch(`${homeserver}/_matrix/client/v3/rooms/${roomId}/forget`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${access_token}`
+      }
+    })
+  );
+};
+
 export const sendEvent = (roomId: string, content: any, type: string) => {
   return fetch(`${homeserver}/_matrix/client/v3/rooms/${roomId}/send/${type}`, {
     method: 'POST',

@@ -1,5 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
-import { sendMessage, getEvent, createRoom } from './matrixClientRequests';
+import {
+  sendMessage,
+  getEvent,
+  createRoom,
+  addToRoom
+} from './matrixClientRequests';
 import { PERSON_NAME, ROLE_NAME, PSEUDO_STATE_EVENT_TYPE } from './constants';
 import { getPseudoState, setPseudoState } from './pseudoState';
 
@@ -61,6 +66,7 @@ const assignRole = async (
 };
 
 const handleReply = async (event) => {
+  const sender = event.event.sender;
   const roomId = event.event.room_id;
   const message = event.event.content.body;
   const replyText = message.split('\n\n')[1] || message;
@@ -79,6 +85,35 @@ const handleReply = async (event) => {
   if (expecting === ROLE_NAME) {
     const personName = prevEvent.content.context.person.name;
     assignRole(personName, roomId, replyText);
+  }
+  if (expecting === 'room_numbers') {
+    const nums_re = /\d+/g;
+    const options = prevEvent.content.context.options;
+    console.log(options);
+    console.log(replyText);
+    const selectedRooms = [...replyText.matchAll(nums_re)];
+    console.log(selectedRooms);
+    const addRooms = selectedRooms
+      .map((room) => options[room])
+      .filter((e) => {
+        return e != undefined;
+      });
+    console.log(addRooms);
+    addRooms.forEach(async (room) => addToRoom(room, sender));
+
+    if (addRooms.length > 0) {
+      sendMessage(
+        roomId,
+        `🤖New Member Handler🤖: You've been added to the following rooms: ${addRooms.join(
+          ', '
+        )}`
+      );
+    } else {
+      sendMessage(
+        roomId,
+        `🤖New Member Handler🤖: You didn't select any valid rooms to join.`
+      );
+    }
   }
 };
 
